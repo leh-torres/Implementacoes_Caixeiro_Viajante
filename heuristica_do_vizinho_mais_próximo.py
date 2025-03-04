@@ -113,7 +113,7 @@ def processar_arquivo_matrizes(caminho_arquivo):
 
 # Exemplo de uso para o arquivo 'matriz4.txt'
 if __name__ == "__main__":
-    arquivo_matrizes = 'matrizes/matriz20.txt'
+    arquivo_matrizes = 'matrizes/matriz4.txt'
     
     # Verificar se o arquivo existe
     if os.path.exists(arquivo_matrizes):
