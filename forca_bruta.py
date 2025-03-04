@@ -1,8 +1,9 @@
 from itertools import permutations
 import time
+import os
+import ast
 
 def tsp(matriz):
-
     numCidades = len(matriz)
     cidades = list(range(1, numCidades))
     
@@ -27,13 +28,91 @@ def tsp(matriz):
 
     melhorCam = melhorCam + [0]
     
-    print("Distância mínima:", minCost)
-    print("Melhor caminho:", melhorCam)
+    return minCost, melhorCam
 
-m_dist = [[0, 25.553864678361276, 20.248456731316587, 29.154759474226502, 22.135943621178654, 20.0, 31.016124838541646, 11.704699910719626, 11.180339887498949, 9.055385138137417, 32.202484376209235, 9.899494936611665], [25.553864678361276, 0, 5.385164807134504, 17.46424919657298, 37.16180835212409, 13.152946437965905, 7.280109889280518, 26.076809620810597, 17.26267650163207, 23.345235059857504, 27.892651361962706, 35.22782990761707], [20.248456731316587, 5.385164807134504, 0, 18.439088914585774, 33.52610922848042, 11.40175425099138, 12.0, 21.0, 12.041594578792296, 18.110770276274835, 27.730849247724095, 30.0], [29.154759474226502, 17.46424919657298, 18.439088914585774, 0, 28.42534080710379, 9.486832980505138, 14.0, 35.84689665786984, 27.294688127912362, 32.31098884280702, 11.0, 36.22154055254967], [22.135943621178654, 37.16180835212409, 33.52610922848042, 28.42534080710379, 0, 24.698178070456937, 38.8329756778952, 33.83784863137726, 31.064449134018133, 31.04834939252005, 23.08679276123039, 19.79898987322333], [20.0, 13.152946437965905, 11.40175425099138, 9.486832980505138, 24.698178070456937, 0, 14.212670403551895, 26.40075756488817, 18.027756377319946, 22.847319317591726, 16.64331697709324, 27.892651361962706], [31.016124838541646, 7.280109889280518, 12.0, 14.0, 38.8329756778952, 14.212670403551895, 0, 33.0, 24.020824298928627, 30.066592756745816, 25.0, 40.24922359499622], [11.704699910719626, 26.076809620810597, 21.0, 35.84689665786984, 33.83784863137726, 26.40075756488817, 33.0, 0, 9.055385138137417, 3.605551275463989, 41.400483088968905, 18.24828759089466], [11.180339887498949, 17.26267650163207, 12.041594578792296, 27.294688127912362, 31.064449134018133, 18.027756377319946, 24.020824298928627, 9.055385138137417, 0, 6.082762530298219, 33.94112549695428, 20.808652046684813], [9.055385138137417, 23.345235059857504, 18.110770276274835, 32.31098884280702, 31.04834939252005, 22.847319317591726, 30.066592756745816, 3.605551275463989, 6.082762530298219, 0, 37.8021163428716, 17.08800749063506], [32.202484376209235, 27.892651361962706, 27.730849247724095, 11.0, 23.08679276123039, 16.64331697709324, 25.0, 41.400483088968905, 33.94112549695428, 37.8021163428716, 0, 36.6742416417845], [9.899494936611665, 35.22782990761707, 30.0, 36.22154055254967, 19.79898987322333, 27.892651361962706, 40.24922359499622, 18.24828759089466, 20.808652046684813, 17.08800749063506, 36.6742416417845, 0]]
+def ler_matrizes_de_arquivo(caminho_arquivo):
+    """Lê múltiplas matrizes de um único arquivo, onde cada linha contém uma matriz"""
+    matrizes = []
+    
+    with open(caminho_arquivo, "r") as f:
+        for linha in f:
+            if linha.strip():  # Ignora linhas vazias
+                matriz = ast.literal_eval(linha.strip())
+                matrizes.append(matriz)
+    
+    return matrizes
 
-print(m_dist, type(m_dist))
-inicio = time.time()
-tsp(m_dist)
-fim = time.time()
-print(f'Tempo: {fim-inicio}')
+def processar_arquivo_matrizes(caminho_arquivo):
+    # Extrair tamanho da matriz do nome do arquivo
+    nome_arquivo = os.path.basename(caminho_arquivo)
+    tamanho = nome_arquivo.replace("matriz", "").replace(".txt", "")
+    
+    # Ler as matrizes do arquivo
+    matrizes = ler_matrizes_de_arquivo(caminho_arquivo)
+    
+    tempos = []
+    melhores_caminhos = []
+    menores_distancias = []
+    
+    print(f"Processando {len(matrizes)} matrizes de tamanho {tamanho}...")
+    
+    # Processar cada matriz
+    for i, matriz in enumerate(matrizes):
+        print(f"  Processando matriz {i+1}/{len(matrizes)}")
+        
+        inicio = time.perf_counter()
+        dist_min, melhor_cam = tsp(matriz)
+        fim = time.perf_counter()
+        
+        tempo_execucao = fim - inicio
+        tempos.append(tempo_execucao)
+        melhores_caminhos.append(melhor_cam)
+        menores_distancias.append(dist_min)
+        
+        print(f"    Distância mínima: {dist_min}")
+        print(f"    Melhor caminho: {melhor_cam}")
+        print(f"    Tempo de execução: {tempo_execucao:.5f} segundos")
+    
+    # Calcular tempo médio
+    tempo_medio = sum(tempos) / len(tempos)
+    print(f"Tempo médio de execução: {tempo_medio:.5f} segundos")
+    
+    # Criar diretório de resultados se não existir
+    os.makedirs('resultados', exist_ok=True)
+    
+    # Salvar resultado em arquivo
+    nome_resultado = f'resultados/tam{tamanho}.txt'
+    if os.path.exists(nome_resultado):
+        with open(nome_resultado, 'a') as f:
+            # Adicionar uma linha em branco para separar
+            f.write('\n')
+            # Escrever o tempo médio do algoritmo de programação dinâmica
+            f.write(f'tempo_medio_forca_bruta: {tempo_medio:.6f}\n')
+            
+            # Escrever os arrays de resultados
+            f.write(f'        tempos_pd = {tempos}\n')
+            f.write(f'        melhor_cam_pd = {melhores_caminhos}\n')
+            f.write(f'        menor_dist_pd = {menores_distancias}\n')
+    else:
+        # Se o arquivo não existir, criar um novo
+        with open(nome_resultado, 'w') as f:
+            f.write(f'tempo_medio_pd: {tempo_medio:.6f}\n')
+            
+            # Escrever os arrays de resultados
+            f.write(f'        tempos_pd = {tempos}\n')
+            f.write(f'        melhor_cam_pd = {melhores_caminhos}\n')
+            f.write(f'        menor_dist_pd = {menores_distancias}\n')
+    
+    print(f"Resultados salvos em {nome_resultado}")
+    
+    return tempo_medio
+
+# Exemplo de uso para o arquivo 'matriz4.txt'
+if __name__ == "__main__":
+    arquivo_matrizes = 'matrizes/matriz14.txt'
+    
+    # Verificar se o arquivo existe
+    if os.path.exists(arquivo_matrizes):
+        tempo_medio = processar_arquivo_matrizes(arquivo_matrizes)
+    else:
+        print(f"Arquivo {arquivo_matrizes} não encontrado!")

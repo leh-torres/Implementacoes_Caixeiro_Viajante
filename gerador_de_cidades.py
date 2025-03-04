@@ -1,5 +1,6 @@
 import random
 import math
+import os
 
 class Gerador_de_Cidades():
 
@@ -9,12 +10,11 @@ class Gerador_de_Cidades():
         self.m_pesos = []
 
     def gerar_pontos(self):
-
+        self.cidades = [] 
         cid_anterior = (0, 0)
         tamanho = self.tam
 
         while tamanho != 0:
-
             x = random.randint(1, 40)
             y = random.randint(1, 40)
 
@@ -24,8 +24,8 @@ class Gerador_de_Cidades():
                 self.cidades.append(cid)
                 cid_anterior = cid
                 tamanho -= 1
-            
-        print(self.cidades)
+        
+        # print(self.cidades)  
 
     def calcula_dist(self, p1, p2):
         return math.sqrt(math.pow((p2[0]-p1[0]), 2) + math.pow((p2[1]-p1[1]), 2))
@@ -48,26 +48,29 @@ class Gerador_de_Cidades():
 
                     self.m_pesos[i][j] = dist
                 
-        print('Matriz finalizada!')
+        # print('Matriz finalizada!')  
+        return self.m_pesos
 
-    def salvar_matriz(self):
-        nome = 'matriz' + str(self.tam) + '.txt'
+    def salvar_matrizes(matrizes, tamanho):
+        
+        os.makedirs('matrizes', exist_ok=True)
+        
+        nome = 'matrizes/matriz' + str(tamanho) + '.txt'
         with open(nome, 'w') as arq:
-            arq.write(str(self.m_pesos))
+            for matriz in matrizes:
+                arq.write(str(matriz) + '\n')  
 
 
 if __name__ == '__main__':
-
     tam = [4, 6, 8, 10, 12, 14, 16, 18, 20]
 
     for i in tam:
-        gerador = Gerador_de_Cidades(i)
-        gerador.gerar_matriz_de_adj()
-        gerador.salvar_matriz()
-
-
-
-
-
-
-    
+        matrizes = []  
+        
+        for j in range(10):
+            gerador = Gerador_de_Cidades(i)
+            matriz = gerador.gerar_matriz_de_adj()
+            matrizes.append(matriz)
+            print(f"  Matriz {j+1}/10 ")
+        
+        Gerador_de_Cidades.salvar_matrizes(matrizes, i)
